@@ -126,7 +126,8 @@ jobs:
 
       - name: Validate formula with Homebrew
         run: |
-          HOMEBREW_NO_INSTALL_CLEANUP=1 brew install --formula Formula/decoreba.rb
+          brew tap matheuzgomes/decoreba "$PWD"
+          HOMEBREW_NO_INSTALL_CLEANUP=1 brew install matheuzgomes/decoreba/decoreba
           brew audit --strict --online decoreba
           brew test decoreba
 
