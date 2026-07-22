@@ -1,0 +1,135 @@
+name: Update Formula
+
+on:
+  repository_dispatch:
+    types: [decoreba-release]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version (e.g. 0.3.0)"
+        required: true
+        type: string
+
+concurrency:
+  group: formula-update
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "version=${{ inputs.version }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=${{ github.event.client_payload.version }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Check current formula version
+        id: check
+        env:
+          NEW_VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          CURRENT=$(grep -E 'version "' Formula/decoreba.rb 2>/dev/null | head -1 | sed 's/.*"\(.*\)".*/\1/' || echo "none")
+          echo "current=${CURRENT}" >> "$GITHUB_OUTPUT"
+
+          if [ "$CURRENT" = "none" ]; then exit 0; fi
+          if [ "$NEW_VERSION" = "$CURRENT" ]; then echo "skip=true" >> "$GITHUB_OUTPUT"; exit 0; fi
+
+          LOWEST=$(printf "%s\n%s" "$NEW_VERSION" "$CURRENT" | sort -V | head -1)
+          if [ "$LOWEST" = "$NEW_VERSION" ]; then echo "New version $NEW_VERSION is lower than current $CURRENT."; exit 1; fi
+
+      - name: Skip if version unchanged
+        if: steps.check.outputs.skip == 'true'
+        run: echo "Formula already at ${{ steps.version.outputs.version }} — skipping."
+
+      - name: Download and checksum assets
+        id: dl
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          for asset in decoreba-darwin-amd64 decoreba-darwin-arm64 decoreba-linux-amd64 decoreba-linux-arm64; do
+            echo "Downloading $asset ..."
+            curl -sSfLO "https://github.com/matheuzgomes/decoreba/releases/download/v${VERSION}/${asset}" \
+              --retry 3 --retry-connrefused
+            test -f "$asset" || { echo "Missing: $asset"; exit 1; }
+            SHA=$(shasum -a 256 "$asset" | awk '{print $1}')
+            KEY=$(echo "$asset" | sed 's/^decoreba-//; s/-/_/g')
+            echo "${KEY}=${SHA}" >> "$GITHUB_OUTPUT"
+          done
+
+      - name: Generate formula
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          DARWIN_AMD64_SHA: ${{ steps.dl.outputs.darwin_amd64 }}
+          DARWIN_ARM64_SHA: ${{ steps.dl.outputs.darwin_arm64 }}
+          LINUX_AMD64_SHA: ${{ steps.dl.outputs.linux_amd64 }}
+          LINUX_ARM64_SHA: ${{ steps.dl.outputs.linux_arm64 }}
+        run: |
+          cat > Formula/decoreba.rb <<- FORMULA
+          class Decoreba < Formula
+            desc "Personal command vault, organized by context"
+            homepage "https://github.com/matheuzgomes/decoreba"
+            version "${VERSION}"
+            license "MIT"
+
+            on_macos do
+              if Hardware::CPU.intel?
+                url "https://github.com/matheuzgomes/decoreba/releases/download/v${VERSION}/decoreba-darwin-amd64"
+                sha256 "${DARWIN_AMD64_SHA}"
+              end
+            end
+
+            on_macos do
+              if Hardware::CPU.arm?
+                url "https://github.com/matheuzgomes/decoreba/releases/download/v${VERSION}/decoreba-darwin-arm64"
+                sha256 "${DARWIN_ARM64_SHA}"
+              end
+            end
+
+            on_linux do
+              if Hardware::CPU.intel?
+                url "https://github.com/matheuzgomes/decoreba/releases/download/v${VERSION}/decoreba-linux-amd64"
+                sha256 "${LINUX_AMD64_SHA}"
+              end
+            end
+
+            on_linux do
+              if Hardware::CPU.arm?
+                url "https://github.com/matheuzgomes/decoreba/releases/download/v${VERSION}/decoreba-linux-arm64"
+                sha256 "${LINUX_ARM64_SHA}"
+              end
+            end
+
+            def install
+              bin.install Dir["decoreba-*"].first => "decoreba"
+            end
+
+            test do
+              assert_match "decoreba", shell_output("\#{bin}/decoreba version")
+            end
+          end
+          FORMULA
+        shell: bash
+
+      - name: Validate formula with Homebrew
+        run: |
+          set -e
+          brew audit --strict --online --new-formula Formula/decoreba.rb
+          HOMEBREW_NO_INSTALL_CLEANUP=1 brew install --formula Formula/decoreba.rb
+          brew test decoreba
+
+      - name: Commit formula update
+        run: |
+          git config user.name "decoreba bot"
+          git config user.email "bot@decoreba.dev"
+          git add Formula/decoreba.rb
+          git commit -m "Update decoreba to v${{ steps.version.outputs.version }}"
+          git push
