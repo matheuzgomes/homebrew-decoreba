@@ -86,11 +86,7 @@ jobs:
                   if Hardware::CPU.intel?
                     url "https://github.com/matheuzgomes/decoreba/releases/download/v#{version}/decoreba-darwin-amd64"
                     sha256 "#{sha_darwin_amd64}"
-                  end
-                end
-
-                on_macos do
-                  if Hardware::CPU.arm?
+                  elsif Hardware::CPU.arm?
                     url "https://github.com/matheuzgomes/decoreba/releases/download/v#{version}/decoreba-darwin-arm64"
                     sha256 "#{sha_darwin_arm64}"
                   end
@@ -100,11 +96,7 @@ jobs:
                   if Hardware::CPU.intel?
                     url "https://github.com/matheuzgomes/decoreba/releases/download/v#{version}/decoreba-linux-amd64"
                     sha256 "#{sha_linux_amd64}"
-                  end
-                end
-
-                on_linux do
-                  if Hardware::CPU.arm?
+                  elsif Hardware::CPU.arm?
                     url "https://github.com/matheuzgomes/decoreba/releases/download/v#{version}/decoreba-linux-arm64"
                     sha256 "#{sha_linux_arm64}"
                   end

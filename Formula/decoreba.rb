@@ -8,11 +8,7 @@ class Decoreba < Formula
     if Hardware::CPU.intel?
       url "https://github.com/matheuzgomes/decoreba/releases/download/vVERSION/decoreba-darwin-amd64"
       sha256 "DARWIN_AMD64_SHA256"
-    end
-  end
-
-  on_macos do
-    if Hardware::CPU.arm?
+    elsif Hardware::CPU.arm?
       url "https://github.com/matheuzgomes/decoreba/releases/download/vVERSION/decoreba-darwin-arm64"
       sha256 "DARWIN_ARM64_SHA256"
     end
@@ -22,11 +18,7 @@ class Decoreba < Formula
     if Hardware::CPU.intel?
       url "https://github.com/matheuzgomes/decoreba/releases/download/vVERSION/decoreba-linux-amd64"
       sha256 "LINUX_AMD64_SHA256"
-    end
-  end
-
-  on_linux do
-    if Hardware::CPU.arm?
+    elsif Hardware::CPU.arm?
       url "https://github.com/matheuzgomes/decoreba/releases/download/vVERSION/decoreba-linux-arm64"
       sha256 "LINUX_ARM64_SHA256"
     end
