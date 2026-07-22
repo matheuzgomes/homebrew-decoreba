@@ -62,11 +62,11 @@ jobs:
 
       - name: Generate formula
         run: |
-          VERSION="${{ steps.version.outputs.version }}"
-          DARWIN_AMD64_SHA="${{ steps.dl.outputs.darwin_amd64 }}"
-          DARWIN_ARM64_SHA="${{ steps.dl.outputs.darwin_arm64 }}"
-          LINUX_AMD64_SHA="${{ steps.dl.outputs.linux_amd64 }}"
-          LINUX_ARM64_SHA="${{ steps.dl.outputs.linux_arm64 }}"
+          export VERSION="${{ steps.version.outputs.version }}"
+          export DARWIN_AMD64_SHA="${{ steps.dl.outputs.darwin_amd64 }}"
+          export DARWIN_ARM64_SHA="${{ steps.dl.outputs.darwin_arm64 }}"
+          export LINUX_AMD64_SHA="${{ steps.dl.outputs.linux_amd64 }}"
+          export LINUX_ARM64_SHA="${{ steps.dl.outputs.linux_arm64 }}"
 
           ruby -e '
             version = ENV.fetch("VERSION")
