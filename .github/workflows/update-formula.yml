@@ -125,9 +125,18 @@ jobs:
         shell: bash
 
       - name: Validate formula with Homebrew
+        env:
+          HOMEBREW_NO_INSTALL_CLEANUP: 1
+          HOMEBREW_NO_REQUIRE_TAP_TRUST: 1
         run: |
-          brew tap matheuzgomes/decoreba "$PWD"
-          HOMEBREW_NO_INSTALL_CLEANUP=1 brew install matheuzgomes/decoreba/decoreba
+          # Register the tap, then overwrite formula with generated one
+          brew tap matheuzgomes/decoreba "$PWD" 2>/dev/null || true
+          TAP_PATH="$(brew --repo matheuzgomes/decoreba 2>/dev/null)"
+          if [ -z "$TAP_PATH" ]; then
+            TAP_PATH="/opt/homebrew/Library/Taps/matheuzgomes/homebrew-decoreba"
+          fi
+          cp Formula/decoreba.rb "$TAP_PATH/Formula/decoreba.rb"
+          brew install matheuzgomes/decoreba/decoreba
           brew audit --strict --online decoreba
           brew test decoreba
 
