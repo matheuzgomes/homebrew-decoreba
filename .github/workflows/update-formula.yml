@@ -126,7 +126,7 @@ jobs:
 
       - name: Validate formula with Homebrew
         run: |
-          brew audit --strict --online --new-formula Formula/decoreba.rb
+          brew audit --strict --online --new Formula/decoreba.rb
           HOMEBREW_NO_INSTALL_CLEANUP=1 brew install --formula Formula/decoreba.rb
           brew test decoreba
 
