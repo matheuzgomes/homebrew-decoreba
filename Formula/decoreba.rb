@@ -1,26 +1,26 @@
 class Decoreba < Formula
   desc "Personal command vault, organized by context"
   homepage "https://github.com/matheuzgomes/decoreba"
-  version "0.3.0"
+  version "0.4.0"
   license "MIT"
 
   on_macos do
     if Hardware::CPU.intel?
-      url "https://github.com/matheuzgomes/decoreba/releases/download/v0.3.0/decoreba-darwin-amd64"
-      sha256 "431fb2769238e2cf3cfec16c177ee0cabb769005cd393e43e71db4b6ec783c1d"
+      url "https://github.com/matheuzgomes/decoreba/releases/download/v0.4.0/decoreba-darwin-amd64"
+      sha256 "ab2fe5542c9f3a86245e6838c4c099065ece68d782b4b54c09fbf73cc8bf58e1"
     elsif Hardware::CPU.arm?
-      url "https://github.com/matheuzgomes/decoreba/releases/download/v0.3.0/decoreba-darwin-arm64"
-      sha256 "7ebbce4fd6c358ccdaf6ba8b76163478390df92f343b47378dc7320509545f7f"
+      url "https://github.com/matheuzgomes/decoreba/releases/download/v0.4.0/decoreba-darwin-arm64"
+      sha256 "cec16685b4956917b8d48095eb65318902093fc3ed2e4f30e00073f91f6b4f62"
     end
   end
 
   on_linux do
     if Hardware::CPU.intel?
-      url "https://github.com/matheuzgomes/decoreba/releases/download/v0.3.0/decoreba-linux-amd64"
-      sha256 "5f2acaf06a5ef890327983c6fb8cf9c2ba45ec20249196e09e0290e6fd4062e8"
+      url "https://github.com/matheuzgomes/decoreba/releases/download/v0.4.0/decoreba-linux-amd64"
+      sha256 "6229e48e95b7f08753aca61e5677253c2c1a4254bf5000d622d72bcf3e7627b6"
     elsif Hardware::CPU.arm?
-      url "https://github.com/matheuzgomes/decoreba/releases/download/v0.3.0/decoreba-linux-arm64"
-      sha256 "98df82e660a38f422ff52015d9633dcde1bb22a4319204e4c74453aba4e27ada"
+      url "https://github.com/matheuzgomes/decoreba/releases/download/v0.4.0/decoreba-linux-arm64"
+      sha256 "50c37873e8240db72d43bc8d230ffd18f5bb7ba9d68abf2bcc4e0e6eae8ec55c"
     end
   end
 
